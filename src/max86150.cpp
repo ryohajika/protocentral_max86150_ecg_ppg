@@ -125,22 +125,22 @@ void MAX86150::setPulseWidth(uint8_t pulseWidth) {
 // See datasheet, page 21
 void MAX86150::setPulseAmplitudeRed(uint8_t amplitude)
 {
-  writeRegister8(_i2caddr, MAX86150_LED2_PULSEAMP, amplitude);
+  writeRegister8(_i2caddr, MAX86150_LED2_PULSEAMP, amplitude, false);
 }
 
 void MAX86150::setPulseAmplitudeIR(uint8_t amplitude)
 {
-  writeRegister8(_i2caddr, MAX86150_LED1_PULSEAMP, amplitude);
+  writeRegister8(_i2caddr, MAX86150_LED1_PULSEAMP, amplitude, false);
 }
 
 void MAX86150::setPulseAmplitudeProximity(uint8_t amplitude) {
-  writeRegister8(_i2caddr, MAX86150_LED_PILOT_PA, amplitude);
+  writeRegister8(_i2caddr, MAX86150_LED_PILOT_PA, amplitude, false);
 }
 
 void MAX86150::setProximityThreshold(uint8_t threshMSB)
 {
   // The threshMSB signifies only the 8 most significant-bits of the ADC count.
-  writeRegister8(_i2caddr, MAX86150_PROXINTTHRESH, threshMSB);
+  writeRegister8(_i2caddr, MAX86150_PROXINTTHRESH, threshMSB, false);
 }
 
 //Given a slot number assign a thing to it
@@ -173,8 +173,8 @@ void MAX86150::enableSlot(uint8_t slotNumber, uint8_t device)
 //Clears all slot assignments
 void MAX86150::disableSlots(void)
 {
-  writeRegister8(_i2caddr, MAX86150_FIFOCONTROL1, 0);
-  writeRegister8(_i2caddr, MAX86150_FIFOCONTROL2, 0);
+  writeRegister8(_i2caddr, MAX86150_FIFOCONTROL1, 0, false);
+  writeRegister8(_i2caddr, MAX86150_FIFOCONTROL2, 0, false);
 }
 
 //
@@ -188,9 +188,9 @@ void MAX86150::setFIFOAverage(uint8_t numberOfSamples)
 
 //Resets all points to start in a known state
 void MAX86150::clearFIFO(void) {
-  writeRegister8(_i2caddr, MAX86150_FIFOWRITEPTR, 0);
-  writeRegister8(_i2caddr, MAX86150_FIFOOVERFLOW, 0);
-  writeRegister8(_i2caddr, MAX86150_FIFOREADPTR, 0);
+  writeRegister8(_i2caddr, MAX86150_FIFOWRITEPTR, 0, false);
+  writeRegister8(_i2caddr, MAX86150_FIFOOVERFLOW, 0, false);
+  writeRegister8(_i2caddr, MAX86150_FIFOREADPTR, 0, false);
 }
 
 //Enable roll over if FIFO over flows
@@ -219,9 +219,14 @@ uint8_t MAX86150::getReadPointer(void) {
   return (readRegister8(_i2caddr, MAX86150_FIFOREADPTR));
 }
 
+//Read the FIFO OverFlow Pointer
+uint8_t MAX86150::getOverflowPointer(void) {
+    return (readRegister8(_i2caddr, MAX86150_FIFOOVERFLOW));
+}
+
 // Set the PROX_INT_THRESHold
 void MAX86150::setPROXINTTHRESH(uint8_t val) {
-  writeRegister8(_i2caddr, MAX86150_PROXINTTHRESH, val);
+  writeRegister8(_i2caddr, MAX86150_PROXINTTHRESH, val, false);
 }
 
 //
@@ -241,9 +246,9 @@ uint8_t MAX86150::readPartID() {
 void MAX86150::setup(byte powerLevel, byte sampleAverage, byte ledMode, int sampleRate, int pulseWidth, int adcRange)
 {
 		activeDevices=3;
-		writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x01);
+		writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x01,false);
 		delay(100);
-		writeRegister8(_i2caddr,MAX86150_FIFOCONFIG,0x7F);
+		writeRegister8(_i2caddr,MAX86150_FIFOCONFIG,0x7F,false);
 
 		//FIFO Configuration
 		//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -264,24 +269,24 @@ void MAX86150::setup(byte powerLevel, byte sampleAverage, byte ledMode, int samp
 
 		//FIFO Control 1 = FD2|FD1, FIFO Control 2 = FD4|FD3
 
-		writeRegister8(_i2caddr,MAX86150_FIFOCONTROL1,(0b00100001));
+		writeRegister8(_i2caddr,MAX86150_FIFOCONTROL1,(0b00100001),false);
 		//writeRegister8(_i2caddr,MAX86150_FIFOCONTROL1,(0b00001001));
-		writeRegister8(_i2caddr,MAX86150_FIFOCONTROL2,(0b00001001));
+		writeRegister8(_i2caddr,MAX86150_FIFOCONTROL2,(0b00001001),false);
 		//writeRegister8(_i2caddr,MAX86150_FIFOCONTROL2,(0b00000000));
 		//writeRegister8(_i2caddr,MAX86150_FIFOCONTROL1, (char)(FIFOCode & 0x00FF) );
 		//writeRegister8(_i2caddr,MAX86150_FIFOCONTROL2, (char)(FIFOCode >>8) );
 
-		writeRegister8(_i2caddr,MAX86150_PPGCONFIG1,0b11010001);
+		writeRegister8(_i2caddr,MAX86150_PPGCONFIG1,0b11010001,false);
 		//writeRegister8(_i2caddr,MAX86150_PPGCONFIG1,0b11100111);
 
-		writeRegister8(_i2caddr,MAX86150_PPGCONFIG2, 0x06);
-		writeRegister8(_i2caddr,MAX86150_LED_RANGE, 0x00 ); // PPG_ADC_RGE: 32768nA
+		writeRegister8(_i2caddr,MAX86150_PPGCONFIG2, 0x06,false);
+		writeRegister8(_i2caddr,MAX86150_LED_RANGE, 0x00 ,false); // PPG_ADC_RGE: 32768nA
 
-		writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x04);//start FIFO
+		writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x04,false);//start FIFO
 
-		writeRegister8(_i2caddr,MAX86150_ECG_CONFIG1,0b00000011);///0b00000011); // SR: 200
+		writeRegister8(_i2caddr,MAX86150_ECG_CONFIG1,0b00000011,false);///0b00000011); // SR: 200
 		
-    writeRegister8(_i2caddr,MAX86150_ECG_CONFIG3,0b00001101); // IA Gain: 9.5 / PGA Gain: 8
+    writeRegister8(_i2caddr,MAX86150_ECG_CONFIG3,0b00001101,false); // IA Gain: 9.5 / PGA Gain: 8
 
 		setPulseAmplitudeRed(0xFF);
 		setPulseAmplitudeIR(0xFF);
@@ -306,9 +311,9 @@ void MAX86150::ppgSetup(bool enRed, bool enIR,
                         uint8_t redPower, uint8_t irPower, uint8_t sampleAverage,
                         uint8_t sampleRate, uint8_t pulseWidth, uint8_t adcRange){
 
-    writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x01);
+    writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x01,false);
     delay(100);
-    writeRegister8(_i2caddr,MAX86150_FIFOCONFIG,0x7F);
+    writeRegister8(_i2caddr,MAX86150_FIFOCONFIG,0x7F,false);
 
     //FIFO Configuration
     //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -317,6 +322,7 @@ void MAX86150::ppgSetup(bool enRed, bool enIR,
     setADCRange(adcRange);
     setSampleRate(sampleRate);
     setPulseWidth(pulseWidth);
+    enableDATARDY();
 
     uint16_t FIFOCode = 0x00;
 
@@ -326,40 +332,40 @@ void MAX86150::ppgSetup(bool enRed, bool enIR,
     // LED1: IR, LED2: RED
     //FIFO Control 1 = FD2|FD1, FIFO Control 2 = FD4|FD3
     if(enRed == true && enIR == false){
-        activeDevices = 1;
-        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL1,(0b00100000));
-        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL2,(0b00000000));
-        writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x04);//start FIFO
+        activeDevices = (byte)0b1000;
+        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL1,(0b00100000),false);
+        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL2,(0b00000000),false);
+        writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x04,false);//start FIFO
         bitMask(MAX86150_LED_RANGE, MAX86150_LED2_RGE_MASK, redCurrentRange);
         setPulseAmplitudeRed(redPower);
     }
     else if(enRed == false && enIR == true){
-        activeDevices = 1;
-        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL1,(0b00000001));
-        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL2,(0b00000000));
-        writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x04);//start FIFO
+        activeDevices = (byte)0b0100;
+        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL1,(0b00000001),false);
+        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL2,(0b00000000),false);
+        writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x04,false);//start FIFO
         bitMask(MAX86150_LED_RANGE, MAX86150_LED1_RGE_MASK, irCurrentRange);
         setPulseAmplitudeIR(irPower);
     }
     else if(enRed == true && enIR == true){
-        activeDevices = 2;
-        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL1,(0b00100001));
-        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL2,(0b00000000));
-        writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x04);//start FIFO
+        activeDevices = (byte)0b1100;
+        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL1,(0b00100001),false);
+        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL2,(0b00000000),false);
+        writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x04,false);//start FIFO
         bitMask(MAX86150_LED_RANGE, MAX86150_LED2_RGE_MASK, redCurrentRange);
         bitMask(MAX86150_LED_RANGE, MAX86150_LED1_RGE_MASK, irCurrentRange);
         setPulseAmplitudeRed(redPower);
         setPulseAmplitudeIR(irPower);
     }
     else{   // LEDs + ECG
-        activeDevices = 3;
-        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL1,(0b00100001));
-        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL2,(0b00001001));
+        activeDevices = (byte)0b1110;
+        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL1,(0b00100001),false);
+        writeRegister8(_i2caddr,MAX86150_FIFOCONTROL2,(0b10010000),false);
 
-        writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x04);//start FIFO
+        writeRegister8(_i2caddr,MAX86150_SYSCONTROL,0x04,false);//start FIFO
 
-        writeRegister8(_i2caddr,MAX86150_ECG_CONFIG1,0b00000011);///0b00000011); // SR: 200
-        writeRegister8(_i2caddr,MAX86150_ECG_CONFIG3,0b00001101); // IA Gain: 9.5 / PGA Gain: 8
+        writeRegister8(_i2caddr,MAX86150_ECG_CONFIG1,0b00000011,false);///0b00000011); // SR: 200
+        writeRegister8(_i2caddr,MAX86150_ECG_CONFIG3,0b00001101,false); // IA Gain: 9.5 / PGA Gain: 8
 
         setPulseAmplitudeRed(redPower);
         setPulseAmplitudeIR(irPower);
@@ -378,7 +384,9 @@ void MAX86150::ppgSetup(bool enRed, bool enIR,
 //enableSlot(3, SLOT_GREEN_PILOT);
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-  clearFIFO(); //Reset the FIFO before we begin checking the sensor
+    sense.head = 0;
+    sense.tail = 0;
+    clearFIFO(); //Reset the FIFO before we begin checking the sensor
 }
 
 //Tell caller how many samples are available
@@ -438,14 +446,23 @@ int32_t MAX86150::getFIFOECG(void)
   return (sense.ecg[sense.tail]);
 }
 
+bool MAX86150::getNextBufferedData(uint32_t *red, uint32_t *ir, int32_t *ecg){
+    red = &sense.red[sense.tail];
+    ir = &sense.IR[sense.tail];
+    ecg = &sense.ecg[sense.tail];
+    sense.tail == (STORAGE_SIZE - 1) ? sense.tail = 0 : sense.tail++;
+    if(sense.tail != sense.head){
+        return true;
+    }else{
+        return false;
+    }
+}
+
 //Advance the tail
 void MAX86150::nextSample(void)
 {
-  if(available()) //Only advance the tail if new data is available
-  {
-    sense.tail++;
-    sense.tail %= STORAGE_SIZE; //Wrap condition
-  }
+  sense.tail++;
+  sense.tail %= STORAGE_SIZE; //Wrap condition
 }
 
 //Polls the sensor for new data
@@ -461,6 +478,31 @@ uint16_t MAX86150::check(void)
   byte writePointer = getWritePointer();
 
   int numberOfSamples = 0;
+    
+    int deviceCount = 0;
+    switch(activeDevices){
+        case 0b1000:
+        case 0b0100:
+        case 0b0010:
+        case 0b0001:
+            deviceCount = 1;
+            break;
+        case 0b1100:
+        case 0b1001:
+        case 0b1010:
+        case 0b0110:
+        case 0b0101:
+            deviceCount = 2;
+            break;
+        case 0b1110:
+        case 0b1101:
+        default:
+            deviceCount = 3;
+            break;
+        case 0b1111:
+            deviceCount = 4;
+            break;
+    }
 
   //Do we have new data?
   if (readPointer != writePointer)
@@ -471,7 +513,7 @@ uint16_t MAX86150::check(void)
 
     //We now have the number of readings, now calc bytes to read
     //For this example we are just doing Red and IR (3 bytes each)
-    int bytesLeftToRead = numberOfSamples * activeDevices * 3;
+    int bytesLeftToRead = numberOfSamples * deviceCount * 3;
 
     //Get ready to read a burst of data from the FIFO register
     _i2cPort->beginTransmission(_i2caddr);
@@ -490,7 +532,7 @@ uint16_t MAX86150::check(void)
         //32 % 6 = 2 left over. We don't want to request 32 bytes, we want to request 30.
         //32 % 9 (Red+IR+GREEN) = 5 left over. We want to request 27.
 
-        toGet = I2C_BUFFER_LENGTH - (I2C_BUFFER_LENGTH % (activeDevices * 3)); //Trim toGet to be a multiple of the samples we need to read
+        toGet = I2C_BUFFER_LENGTH - (I2C_BUFFER_LENGTH % (deviceCount * 3)); //Trim toGet to be a multiple of the samples we need to read
       }
 
       bytesLeftToRead -= toGet;
@@ -519,7 +561,7 @@ uint16_t MAX86150::check(void)
 
         sense.red[sense.head] = tempLong; //Store this reading into the sense array
 
-        if (activeDevices > 1)
+        if (deviceCount > 1)
         {
           //Burst read three more bytes - IR
           temp[3] = 0;
@@ -535,7 +577,7 @@ uint16_t MAX86150::check(void)
 				  sense.IR[sense.head] = tempLong;
         }
 
-        if (activeDevices > 2)
+        if (deviceCount > 2)
         {
           //Burst read three more bytes - ECG
 					int32_t tempLongSigned;
@@ -553,11 +595,151 @@ uint16_t MAX86150::check(void)
           sense.ecg[sense.head] = tempLongSigned;
         }
 
-        toGet -= activeDevices * 3;
+        toGet -= deviceCount * 3;
       }
     } //End while (bytesLeftToRead > 0)
   } //End readPtr != writePtr
   return (numberOfSamples); //Let the world know how much new data we found
+}
+
+uint16_t MAX86150::ppgCheck(void){
+    readPtr = getReadPointer();
+    writePtr = getWritePointer();
+    ovfCtr = getOverflowPointer();
+
+    //impl modified based on the pseudo code mentioned in the MAX86150 document P.44-45
+    int numberOfSamples = 0;
+
+    //Do we have new data?
+    if (readPtr != writePtr)
+    {
+        if(ovfCtr == 0){
+            // pointer wrap needs to be taken into
+            numberOfSamples = writePtr - readPtr;
+            if (numberOfSamples < 0) numberOfSamples += 32; //Wrap condition
+        }else{  // data lost
+            numberOfSamples = 32;
+        }
+
+      //We now have the number of readings, now calc bytes to read
+      //For this example we are just doing Red and IR (3 bytes each)
+        int bytesLeftToRead = 0;
+        int deviceCount = 0;
+        switch(activeDevices){
+            case 0b1000:
+            case 0b0100:
+            case 0b0010:
+            case 0b0001:
+                bytesLeftToRead = numberOfSamples * 3;
+                deviceCount = 1;
+                break;
+            case 0b1100:
+            case 0b1001:
+            case 0b1010:
+            case 0b0110:
+            case 0b0101:
+                bytesLeftToRead = numberOfSamples * 2 * 3;
+                deviceCount = 2;
+                break;
+            case 0b1110:
+            case 0b1101:
+            default:
+                bytesLeftToRead = numberOfSamples * 3 * 3;
+                deviceCount = 3;
+                break;
+            case 0b1111:
+                bytesLeftToRead = numberOfSamples * 4 * 3;
+                deviceCount = 4;
+                break;
+        }
+
+      //Get ready to read a burst of data from the FIFO register
+      _i2cPort->beginTransmission(_i2caddr);
+      _i2cPort->write(MAX86150_FIFODATA);
+      _i2cPort->endTransmission();
+
+      //We may need to read as many as 288 bytes so we read in blocks no larger than I2C_BUFFER_LENGTH
+      //I2C_BUFFER_LENGTH changes based on the platform. 64 bytes for SAMD21, 32 bytes for Uno.
+      //Wire.requestFrom() is limited to BUFFER_LENGTH which is 32 on the Uno
+      while (bytesLeftToRead > 0)
+      {
+        int toGet = bytesLeftToRead;
+        if (toGet > I2C_BUFFER_LENGTH)
+        {
+          //If toGet is 32 this is bad because we read 6 bytes (Red+IR * 3 = 6) at a time
+          //32 % 6 = 2 left over. We don't want to request 32 bytes, we want to request 30.
+          //32 % 9 (Red+IR+GREEN) = 5 left over. We want to request 27.
+
+          toGet = I2C_BUFFER_LENGTH - (I2C_BUFFER_LENGTH % (deviceCount * 3)); //Trim toGet to be a multiple of the samples we need to read
+        }
+
+        bytesLeftToRead -= toGet;
+
+        //Request toGet number of bytes from sensor
+        _i2cPort->requestFrom(_i2caddr, toGet);
+
+          
+          byte temp[sizeof(uint32_t)]; //Array of 4 bytes that we will convert into long
+          uint32_t tempLong;
+          
+        while (toGet > 0)
+        {
+          sense.head++; //Advance the head of the storage struct
+          sense.head %= STORAGE_SIZE; //Wrap condition
+
+          //Burst read three bytes - RED
+            if(IsBitSet(activeDevices, 3)){
+                temp[3] = 0;
+                temp[2] = _i2cPort->read();
+                temp[1] = _i2cPort->read();
+                temp[0] = _i2cPort->read();
+                
+                //Convert array to long
+                memcpy(&tempLong, temp, sizeof(tempLong));
+                
+                tempLong &= 0x7FFFF; //Zero out all but 18 bits
+                
+                sense.red[sense.head] = tempLong; //Store this reading into the sense array
+            }
+
+          if (IsBitSet(activeDevices, 2)){
+            //Burst read three more bytes - IR
+            temp[3] = 0;
+            temp[2] = _i2cPort->read();
+            temp[1] = _i2cPort->read();
+            temp[0] = _i2cPort->read();
+
+            //Convert array to long
+            memcpy(&tempLong, temp, sizeof(tempLong));
+                      //Serial.println(tempLong);
+                    tempLong &= 0x7FFFF; //Zero out all but 18 bits
+
+                    sense.IR[sense.head] = tempLong;
+          }
+
+          if (IsBitSet(activeDevices, 1))
+          {
+            //Burst read three more bytes - ECG
+                      int32_t tempLongSigned;
+
+            temp[3] = 0;
+            temp[2] = _i2cPort->read();
+            temp[1] = _i2cPort->read();
+            temp[0] = _i2cPort->read();
+                      //Serial.println(tempLong);
+            //Convert array to long
+            memcpy(&tempLongSigned, temp, sizeof(tempLongSigned));
+
+                    //tempLong &= 0x3FFFF; //Zero out all but 18 bits
+
+            sense.ecg[sense.head] = tempLongSigned;
+          }
+
+          toGet -= deviceCount * 3;
+        }
+      } //End while (bytesLeftToRead > 0)
+    } //End readPtr != writePtr
+    return (numberOfSamples); //Let the world know how much new data we found
 }
 
 //Check for new data but give up after a certain amount of time
@@ -579,8 +761,7 @@ bool MAX86150::safeCheck(uint8_t maxTimeToCheck)
 }
 
 //Given a register, read it, mask it, and then set the thing
-void MAX86150::bitMask(uint8_t reg, uint8_t mask, uint8_t thing)
-{
+void MAX86150::bitMask(uint8_t reg, uint8_t mask, uint8_t thing) {
   // Grab current register context
   uint8_t originalContents = readRegister8(_i2caddr, reg);
 
@@ -588,28 +769,26 @@ void MAX86150::bitMask(uint8_t reg, uint8_t mask, uint8_t thing)
   originalContents = originalContents & mask;
 
   // Change contents
-  writeRegister8(_i2caddr, reg, originalContents | thing);
+  writeRegister8(_i2caddr, reg, originalContents | thing, false);
 }
 
 uint8_t MAX86150::readRegister8(uint8_t address, uint8_t reg) {
-
-	//uint8_t tempData = 0;
-  _i2cPort->beginTransmission(address);
-  _i2cPort->write(reg);
-  _i2cPort->endTransmission(false);
-
-  _i2cPort->requestFrom((uint8_t)address, (uint8_t)1); // Request 1 byte
-  if (_i2cPort->available())
-  {
-
-    return(_i2cPort->read());
-  }
-  return (0); //Fail
+    _i2cPort->beginTransmission(address);
+    _i2cPort->write(reg);
+    _i2cPort->endTransmission(false);
+    
+    _i2cPort->requestFrom((uint8_t)address, (uint8_t)1); // Request 1 byte
+    if(_i2cPort->available()){
+        return(_i2cPort->read());
+    }else{
+        return (0); //Fail
+    }
 }
 
-void MAX86150::writeRegister8(uint8_t address, uint8_t reg, uint8_t value) {
-  _i2cPort->beginTransmission(address);
-  _i2cPort->write(reg);
-  _i2cPort->write(value);
-  _i2cPort->endTransmission();
+void MAX86150::writeRegister8(uint8_t address, uint8_t reg, uint8_t value, bool bRepeatedStart) {
+    _i2cPort->beginTransmission(address);
+    _i2cPort->write(reg);
+    _i2cPort->write(value);
+    if(bRepeatedStart) _i2cPort->endTransmission(false);
+    else _i2cPort->endTransmission();
 }

@@ -235,22 +235,21 @@ class MAX86150 {
 
   //FIFO Reading
   uint16_t check(void); //Checks for new data and fills FIFO
+    uint16_t ppgCheck(void); //Checks for new data and fills FIFO
   uint8_t available(void); //Tells caller how many new samples are available (head - tail)
   void nextSample(void); //Advances the tail of the sense array
   uint32_t getFIFORed(void); //Returns the FIFO sample pointed to by tail
   uint32_t getFIFOIR(void); //Returns the FIFO sample pointed to by tail
   int32_t getFIFOECG(void); //Returns the FIFO sample pointed to by tail
+    bool getNextBufferedData(uint32_t *red, uint32_t *ir, int32_t *ecg);
 
   uint8_t getWritePointer(void);
   uint8_t getReadPointer(void);
+    uint8_t getOverflowPointer(void);
   void clearFIFO(void); //Sets the read/write pointers to zero
 
   //Proximity Mode Interrupt Threshold
   void setPROXINTTHRESH(uint8_t val);
-
-  // Die Temperature
-  float readTemperature();
-  float readTemperatureF();
 
   // Detecting ID/Revision
   uint8_t getRevisionID();
@@ -266,22 +265,26 @@ class MAX86150 {
 
   // Low-level I2C communication
   uint8_t readRegister8(uint8_t address, uint8_t reg);
-  void writeRegister8(uint8_t address, uint8_t reg, uint8_t value);
+  void writeRegister8(uint8_t address, uint8_t reg, uint8_t value, bool bRepeatedStart);
 
  private:
   TwoWire *_i2cPort; //The generic connection to user's chosen I2C hardware
   int _i2caddr;
 
   //activeLEDs is the number of channels turned on, and can be 1 to 3. 2 is common for Red+IR.
-  byte activeDevices; //Gets set during setup. Allows check() to calculate how many bytes to read from FIFO
+  byte activeDevices; // 4 hex. 0b0000, [red][ir][ecg][prox]
 
   uint8_t revisionID;
+    
+    uint8_t writePtr;
+    uint8_t readPtr;
+    uint8_t ovfCtr;
 
   void readRevisionID();
 
   void bitMask(uint8_t reg, uint8_t mask, uint8_t thing);
 
-   #define STORAGE_SIZE 4 //Each long is 4 bytes so limit this to fit on your micro
+    #define STORAGE_SIZE 4 //Each long is 4 bytes so limit this to fit on your micro
   typedef struct Record
   {
     uint32_t red[STORAGE_SIZE];
@@ -292,5 +295,10 @@ class MAX86150 {
   } sense_struct; //This is our circular buffer of readings from the sensor
 
   sense_struct sense;
+    
+    bool IsBitSet(byte b, int pos)
+    {
+       return ((b >> pos) & 1) != 0;
+    }
 
 };
